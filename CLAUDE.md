@@ -122,9 +122,35 @@ git pull origin [branch-name]
 
 ## Working with Code
 
+### Package Preferences
+
+This project standardizes on specific Python libraries for data and visualization work:
+
+- **Data manipulation**: **Polars** (not pandas) — faster, more intuitive API, better for large datasets
+- **Visualization**: **Altair** (not matplotlib/seaborn) — declarative, interactive, publication-quality charts
+- **Reporting**: **Great-tables** (not pandas.to_html) — elegant HTML tables with styling, easy exports
+
+Example:
+```python
+import polars as pl
+import altair as alt
+from great_tables import GT
+
+# Load data with polars
+df = pl.read_parquet("data/synthetic/invoices.parquet")
+
+# Visualize with altair
+chart = alt.Chart(df).mark_bar().encode(x="channel", y="count()")
+
+# Create tables with great-tables
+gt = GT(df).tab_header(title="Invoices by Channel")
+```
+
 ### When Adding Features
 - Keep code examples in `docs/03-modeling/example-workflow.md` as the reference implementation
-- Use polars for data manipulation (preferred over pandas in this project)
+- Use **polars** for all DataFrame operations (preferred over pandas)
+- Use **altair** for charts and visualizations (preferred over matplotlib/seaborn)
+- Use **great-tables** for HTML reports and data summaries
 - Follow the five-layer architecture when building new models
 - Rank anomalies by **expected recoverable dollars**, not just anomaly score
 
