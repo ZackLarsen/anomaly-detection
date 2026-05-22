@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repository contains a complete guide and implementation framework for building an anomaly detection system to identify and recover manufacturer rebate leakage in health insurance pharmacy claims. The project combines:
 - **Extensive documentation** (in `docs/`) covering business context, data modeling, machine learning architecture, and deployment
-- **Python implementation examples** using a modern ML stack (scikit-learn, polars, pyod, altair)
+- **Python implementation examples** using a modern ML stack (scikit-learn, polars, pyod, matplotlib, seaborn)
 - **Synthetic data generation** and validation patterns
 
 The primary goal is to identify recoverable rebate gaps at multiple levels: claim-level, product-level, contract-level, and process-level.
@@ -36,7 +36,8 @@ Key packages (defined in `pyproject.toml`):
 - **scikit-learn**: ML algorithms (Isolation Forest, etc.)
 - **pyod**: Anomaly detection library with various algorithms
 - **numpy**: Numerical computing
-- **altair**: Declarative visualization
+- **matplotlib**: Plotting library
+- **seaborn**: Statistical data visualization
 
 ## Documentation Structure
 
@@ -127,20 +128,23 @@ git pull origin [branch-name]
 This project standardizes on specific Python libraries for data and visualization work:
 
 - **Data manipulation**: **Polars** (not pandas) — faster, more intuitive API, better for large datasets
-- **Visualization**: **Altair** (not matplotlib/seaborn) — declarative, interactive, publication-quality charts
+- **Visualization**: **Matplotlib** and **Seaborn** — publication-quality statistical plots and charts
 - **Reporting**: **Great-tables** (not pandas.to_html) — elegant HTML tables with styling, easy exports
 
 Example:
 ```python
 import polars as pl
-import altair as alt
+import matplotlib.pyplot as plt
+import seaborn as sns
 from great_tables import GT
 
 # Load data with polars
 df = pl.read_parquet("data/synthetic/invoices.parquet")
 
-# Visualize with altair
-chart = alt.Chart(df).mark_bar().encode(x="channel", y="count()")
+# Visualize with seaborn
+sns.barplot(data=df, x="channel", y="count")
+plt.title("Invoices by Channel")
+plt.show()
 
 # Create tables with great-tables
 gt = GT(df).tab_header(title="Invoices by Channel")
@@ -149,7 +153,7 @@ gt = GT(df).tab_header(title="Invoices by Channel")
 ### When Adding Features
 - Keep code examples in `docs/03-modeling/example-workflow.md` as the reference implementation
 - Use **polars** for all DataFrame operations (preferred over pandas)
-- Use **altair** for charts and visualizations (preferred over matplotlib/seaborn)
+- Use **matplotlib** and **seaborn** for charts and visualizations
 - Use **great-tables** for HTML reports and data summaries
 - Follow the five-layer architecture when building new models
 - Rank anomalies by **expected recoverable dollars**, not just anomaly score
