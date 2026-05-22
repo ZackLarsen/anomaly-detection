@@ -355,24 +355,38 @@ def test_run_all_validations_with_labels_pass(
 
 def test_run_all_validations_detects_bad_ndc():
     """run_all_validations detects NDC referential integrity failure."""
-    claims = pl.DataFrame({"ndc11": ["99999999999", "10000000001"],
-                            "claim_id": ["C1", "C2"],
-                            "member_id": ["M1", "M1"],
-                            "group_id": ["G1", "G1"],
-                            "fill_date": [date(2024, 1, 1), date(2024, 1, 1)],
-                            "days_supply": [30, 30],
-                            "quantity": [30.0, 30.0],
-                            "channel": ["retail", "retail"],
-                            "plan_paid": [50.0, 50.0],
-                            "gross_drug_cost": [75.0, 75.0],
-                            "claim_status": ["paid", "paid"]}).with_columns(
-        pl.col("fill_date").cast(pl.Date)
-    )
+    claims = pl.DataFrame({
+        "ndc11": ["99999999999", "10000000001"],
+        "claim_id": ["C1", "C2"],
+        "member_id": ["M1", "M1"],
+        "group_id": ["G1", "G1"],
+        "fill_date": [date(2024, 1, 1), date(2024, 1, 1)],
+        "days_supply": [30, 30],
+        "quantity": [30.0, 30.0],
+        "channel": ["retail", "retail"],
+        "plan_paid": [50.0, 50.0],
+        "gross_drug_cost": [75.0, 75.0],
+        "claim_status": ["paid", "paid"],
+    }).with_columns(pl.col("fill_date").cast(pl.Date))
+
     drugs = pl.DataFrame({"ndc11": ["10000000001"]})  # 99999999999 missing
 
-    results = run_all_validations(claims, drugs, pl.DataFrame(), pl.DataFrame(), pl.DataFrame())
+    # Provide a minimal invoices DataFrame with required columns
+    invoices = pl.DataFrame({
+        "invoice_quarter": ["2024-Q1"],
+        "manufacturer": ["M01"],
+        "ndc11": ["10000000001"],
+        "client_id": ["G1"],
+        "invoiced_utilization": [100.0],
+        "expected_rebate": [50.0],
+        "actual_rebate": [48.0],
+        "disputed_rebate": [0.0],
+        "paid_rebate": [48.0],
+    })
+
+    results = run_all_validations(claims, drugs, pl.DataFrame(), pl.DataFrame(), invoices)
     ndc_check_passed, msgs = results["ndc_referential_integrity"]
-    assert not ndc_check_passed
+    assert not ndc_check_passed, f"Expected NDC check to fail, got: {msgs}"
 
 
 # ---------------------------------------------------------------------------

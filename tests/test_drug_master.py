@@ -202,4 +202,4 @@ def test_drugs_reproducibility(config_small, small_claims):
     gen2 = DrugGenerator(config_small, small_claims, seed=42)
     drugs1 = gen1.generate()
     drugs2 = gen2.generate()
-    assert drugs1.frame_equal(drugs2), "Drug DataFrames differ despite same seed"
+    assert drugs1.equals(drugs2), "Drug DataFrames differ despite same seed"

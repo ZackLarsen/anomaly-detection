@@ -222,6 +222,6 @@ def test_invoices_sorted(small_invoices):
     """Invoices must be sorted by (invoice_quarter, manufacturer, ndc11, client_id)."""
     sort_cols = ["invoice_quarter", "manufacturer", "ndc11", "client_id"]
     sorted_df = small_invoices.sort(sort_cols)
-    assert small_invoices.frame_equal(sorted_df), (
+    assert small_invoices.equals(sorted_df), (
         "Invoice DataFrame is not sorted by the expected key columns"
     )

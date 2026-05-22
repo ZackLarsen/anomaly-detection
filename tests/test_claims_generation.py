@@ -232,7 +232,7 @@ def test_claims_reproducibility(config_small):
     gen2 = ClaimsGenerator(config_small, seed=42)
     claims1 = gen1.generate()
     claims2 = gen2.generate()
-    assert claims1.frame_equal(claims2), "Claims DataFrames differ despite same seed"
+    assert claims1.equals(claims2), "Claims DataFrames differ despite same seed"
 
 
 def test_claims_different_seeds_produce_different_data(config_small):
@@ -242,6 +242,6 @@ def test_claims_different_seeds_produce_different_data(config_small):
     claims1 = gen1.generate()
     claims2 = gen2.generate()
     # Very unlikely to be identical with different seeds
-    assert not claims1.frame_equal(claims2), (
+    assert not claims1.equals(claims2), (
         "Claims DataFrames are identical despite different seeds"
     )
