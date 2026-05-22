@@ -1,0 +1,60 @@
+# Base configuration for synthetic Rx rebate data generation.
+#
+# Controls the size of the generated dataset, date range, categorical
+# variable distributions, and rebate noise characteristics.
+# See src/synthetic_data_gen/config.py for field definitions.
+
+# ---------------------------------------------------------------------------
+# Dataset volume
+# ---------------------------------------------------------------------------
+n_claims: 500000
+n_ndcs: 300
+n_groups: 50
+n_manufacturers: 20
+
+# ---------------------------------------------------------------------------
+# Date range
+# ---------------------------------------------------------------------------
+date_range:
+  start: "2024-01-01"
+  end: "2025-12-31"
+
+# ---------------------------------------------------------------------------
+# Categorical distributions
+# ---------------------------------------------------------------------------
+distributions:
+  # Dispensing channel mix (must sum to 1.0)
+  channel:
+    retail: 0.70
+    mail: 0.20
+    specialty: 0.10
+
+  # Days-supply mix (must sum to 1.0)
+  # Common values: 30-day retail, 84/90-day mail-order
+  days_supply:
+    30: 0.65
+    60: 0.05
+    84: 0.10
+    90: 0.20
+
+# ---------------------------------------------------------------------------
+# Drug characteristics
+# ---------------------------------------------------------------------------
+# Probability that a randomly generated NDC is assigned specialty status.
+# Specialty drugs will have higher cost distributions and different channel mix.
+specialty_flag_probability: 0.15
+
+# ---------------------------------------------------------------------------
+# Rebate noise
+# ---------------------------------------------------------------------------
+# Multiplicative noise range applied to expected rebates to produce "normal"
+# actual rebates. A range of [0.95, 1.05] means actual rebate is within ±5%
+# of expected in the baseline (non-anomalous) case.
+rebate_noise_range:
+  - 0.95
+  - 1.05
+
+# ---------------------------------------------------------------------------
+# Reproducibility
+# ---------------------------------------------------------------------------
+random_seed: 42

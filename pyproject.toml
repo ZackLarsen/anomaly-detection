@@ -1,13 +1,31 @@
 [project]
 name = "anomaly-detection"
 version = "0.1.0"
-description = "Add your description here"
+description = "Synthetic pharmacy claims data generator for Rx rebate anomaly detection"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "altair>=6.1.0",
     "numpy>=2.4.6",
     "polars>=1.40.1",
+    "pydantic>=2.13.4",
     "pyod>=3.5.2",
+    "pyyaml>=6.0.3",
     "scikit-learn>=1.8.0",
 ]
+
+[tool.uv]
+package = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "hatchling>=1.29.0",
+    "pytest>=9.0.3",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/synthetic_data_gen"]
