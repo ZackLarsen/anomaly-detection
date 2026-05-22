@@ -9,6 +9,7 @@ injected anomaly labels for use in building and evaluating rebate leakage detect
 __version__ = "0.1.0"
 
 from synthetic_data_gen.config import BaseConfig, load_config, load_anomaly_scenarios
+from synthetic_data_gen.runner import generate_and_save
 from synthetic_data_gen.generate_claims import ClaimsGenerator
 from synthetic_data_gen.generate_contracts import ContractGenerator
 from synthetic_data_gen.generate_drugs import DrugGenerator
@@ -32,6 +33,8 @@ __all__ = [
     "BaseConfig",
     "load_config",
     "load_anomaly_scenarios",
+    # Runner
+    "generate_and_save",
     # Generators
     "ClaimsGenerator",
     "ContractGenerator",
