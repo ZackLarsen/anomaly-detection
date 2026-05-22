@@ -120,12 +120,6 @@ git pull origin [branch-name]
 - **Research branches**: `research/[topic]` (e.g., `research/xgboost-tuning`)
 - **Current branch**: `synthetic-data-generation` (complete synthetic data generator)
 
-**Recent work:**
-- `858757f` — README files (project overview + data generation guide)
-- `57f76b1` — Phase 6 (Jupyter notebooks and CLI)
-- `318f580` — Phase 4 (validation module and 174 tests)
-- Earlier phases: Schema, generators, anomaly injectors
-
 ## Working with Code
 
 ### When Adding Features
@@ -245,10 +239,6 @@ pytest tests/test_anomaly_injection.py -v   # Single test file
 - **Precision@25**: 56%
 - **Precision@50**: 56%
 - **Recall@100**: 54%
-- **Dollars Captured@50**: $647K (68% of labeled impact)
 
 **Target Metrics (when deploying to production):**
 - Precision@100 (target > 70%)
-- Dollars@100 (target > $500K)
-- Analyst agreement (target > 80%)
-- False-positive cost (target < 10% of analyst time)
