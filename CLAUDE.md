@@ -8,7 +8,6 @@ This repository contains a complete guide and implementation framework for build
 - **Extensive documentation** (in `docs/`) covering business context, data modeling, machine learning architecture, and deployment
 - **Python implementation examples** using a modern ML stack (scikit-learn, polars, pyod, altair)
 - **Synthetic data generation** and validation patterns
-- **ROI-focused approach**: Typical organizations recover $2–5M annually with a 5–10x return on system investment
 
 The primary goal is to identify recoverable rebate gaps at multiple levels: claim-level, product-level, contract-level, and process-level.
 
@@ -107,18 +106,25 @@ The recommended production system combines:
 - Coarse enough to avoid noise
 - Aligned with how contracts and invoices are organized
 
-### Quickest Path to ROI
-1. **Weeks 1–4**: Reconciliation + rules → 30–50% of recoverable leakage
-2. **Weeks 5–8**: Add statistical anomaly detection → +15–25%
-3. **Weeks 9–12**: Add Isolation Forest → +10–20%
-4. **Weeks 13–16+**: Supervised learning with accumulated labels → Efficiency gains
-
 ## Git Workflow
 
+**Before pushing, always fetch and pull:**
+```bash
+git fetch origin
+git pull origin [branch-name]
+```
+
+**Branch naming:**
 - **Main branch**: `main` (production-ready)
-- **Feature branches**: Named descriptively (e.g., `feature/synthetic-data-gen`, `research/isolation-forest`)
-- **Recent work**: Check commits for understanding of prior decisions and experiments
-  - Branches are often named `research/` to indicate exploration and documentation work
+- **Feature branches**: `feature/[description]` (e.g., `feature/rbf-kernel`)
+- **Research branches**: `research/[topic]` (e.g., `research/xgboost-tuning`)
+- **Current branch**: `synthetic-data-generation` (complete synthetic data generator)
+
+**Recent work:**
+- `858757f` — README files (project overview + data generation guide)
+- `57f76b1` — Phase 6 (Jupyter notebooks and CLI)
+- `318f580` — Phase 4 (validation module and 174 tests)
+- Earlier phases: Schema, generators, anomaly injectors
 
 ## Working with Code
 
@@ -141,48 +147,108 @@ The recommended production system combines:
 
 ## Testing and Validation
 
-- **Data validation**: Use patterns from `docs/02-data/validation-testing.md`
-- **Model validation**: Follow guidance in `docs/03-modeling/training-strategy.md`
-- **Example end-to-end flow**: See `docs/03-modeling/example-workflow.md`
+### Automated Test Suite (174 tests, 0.8 seconds)
 
-Currently there are no automated tests, but future implementations should:
-- Test data quality checks before modeling
-- Validate reconciliation math against expected rebates
-- Benchmark model precision@K on holdout test sets
-- Validate synthetic data distributions match real data characteristics
+```bash
+pytest tests/                              # Run all tests
+pytest tests/test_schema.py -v             # Run specific test file
+pytest tests/ --cov=src/synthetic_data_gen # With coverage report
+```
+
+**Test files:**
+- `test_schema.py` — Pydantic model validation (28 tests)
+- `test_claims_generation.py` — Claims generation and distributions (18 tests)
+- `test_drug_master.py` — Drug master consistency (13 tests)
+- `test_reconciliation.py` — Invoice reconciliation with claims (15 tests)
+- `test_anomaly_injection.py` — All 7 anomaly injection functions (37 tests)
+- `test_validation.py` — Validation functions (30 tests)
+- `test_runner.py` — CLI and orchestration (33 tests)
+
+### Validation Checks
+
+The `validate.py` module provides 13 data quality checks:
+- Referential integrity (NDCs, null keys, duplicates)
+- Financial constraints (non-negative rebates, paid ≤ actual)
+- Date constraints (no future claims)
+- Reconciliation (invoice aggregates match claims)
+- Anomaly detectability (anomalies have correct characteristics)
+
+Run validation programmatically:
+```python
+from synthetic_data_gen.validate import run_all_validations
+results = run_all_validations(claims, drugs, formulary, contracts, invoices, labels)
+```
+
+All validation checks pass on the provided synthetic dataset.
 
 ## Common Tasks
 
-**Building a synthetic dataset for testing:**
-See `docs/02-data/synthetic-data-generation.md`
+### Running the System
 
-**Understanding a leakage pattern:**
-See `docs/05-common-patterns/anomaly-patterns.md` (covers 10 common patterns)
+**Generate synthetic dataset:**
+```bash
+python main.py                              # Full dataset with anomalies
+python -m synthetic_data_gen generate --seed 999  # Custom seed
+python -m synthetic_data_gen generate --no-anomalies  # Baseline only
+python -m synthetic_data_gen generate --help       # Show all options
+```
 
-**Choosing between algorithms:**
-See `docs/03-modeling/algorithms.md` (rules, statistical, Isolation Forest, supervised)
+**Explore data in Jupyter:**
+```bash
+jupyter notebook
+# Open: notebooks/01_generate_demo_data.ipynb (data exploration)
+# Open: notebooks/02_train_anomaly_models.ipynb (model training)
+```
+
+**Run tests:**
+```bash
+pytest tests/ -v                            # All tests
+pytest tests/test_anomaly_injection.py -v   # Single test file
+```
+
+### Understanding the Code
+
+**Building a synthetic dataset:**
+- Use `generate_and_save()` from `src/synthetic_data_gen/runner.py`
+- Or manually: `ClaimsGenerator`, `DrugGenerator`, `FormularyGenerator`, `ContractGenerator`, `InvoiceGenerator`
+- See `notebooks/02_train_anomaly_models.ipynb` for feature engineering example
+
+**Injecting anomalies:**
+- Use `inject_scenario()` from `src/synthetic_data_gen/inject_anomalies.py`
+- 7 functions available: missing_rebate, unmapped_ndc, yield_collapse, channel_omission, unit_error, dispute_spike, guarantee_true_up
+- Each returns updated invoices, labels, and contracts
+
+**Understanding leakage patterns:**
+- See `docs/05-common-patterns/anomaly-patterns.md` (10 common patterns with detection strategies)
+- See `notebooks/01_generate_demo_data.ipynb` for visual exploration
+
+**Choosing algorithms:**
+- See `docs/03-modeling/algorithms.md` (rules, statistical, Isolation Forest, supervised)
+- See `notebooks/02_train_anomaly_models.ipynb` for Isolation Forest example
 
 **Explaining results to analysts:**
-See `docs/03-modeling/explainability.md`
+- See `docs/03-modeling/explainability.md`
+- Notebooks produce audit queues ranked by priority_score (50% ML + 50% rules)
 
 **Deploying monthly:**
-See `docs/04-implementation/deployment-pipeline.md`
+- See `docs/04-implementation/deployment-pipeline.md`
+- Use `runner.generate_and_save()` to orchestrate full pipeline
 
 ## Key Metrics to Track
 
-**Business:**
-- Dollars identified (estimated leakage)
-- Dollars recovered (actual money back)
-- Recovery rate (recovered / identified)
-- Net ROI
+**System Performance:**
+- **Generation time**: ~4 seconds (500K claims)
+- **Test suite**: 174 tests in 0.8 seconds
+- **Dataset size**: 500K claims, 118K invoices, 7 labeled anomalies
 
-**Model:**
+**Model Evaluation (on synthetic data):**
+- **Precision@25**: 56%
+- **Precision@50**: 56%
+- **Recall@100**: 54%
+- **Dollars Captured@50**: $647K (68% of labeled impact)
+
+**Target Metrics (when deploying to production):**
 - Precision@100 (target > 70%)
 - Dollars@100 (target > $500K)
 - Analyst agreement (target > 80%)
 - False-positive cost (target < 10% of analyst time)
-
-**Operational:**
-- Time to recovery (target < 120 days)
-- Dispute success rate (target > 50%)
-- Audit window preservation (target > 80%)
